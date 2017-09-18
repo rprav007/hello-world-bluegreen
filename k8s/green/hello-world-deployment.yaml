@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-world-green
+  labels:
+    version: v1
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: hello-world-green
+        env: green
+    spec:
+      containers:
+      - name: hello-world 
+        image: quay.io/chris_ricci/hello-world-instrumented:v1
+        ports:
+        - name: web
+          containerPort: 5000
+        - name: metrics
+          containerPort: 8000

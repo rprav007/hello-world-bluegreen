@@ -13,6 +13,6 @@ spec:
           - path: /
             backend:
               serviceName: hello-world-blue
-              servicePort: 8080
+              servicePort: 5000
 status:
   loadBalancer: {}

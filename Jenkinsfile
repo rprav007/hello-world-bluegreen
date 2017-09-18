@@ -54,17 +54,17 @@ node {
     currentBuild.result = 'SUCCESS'   
     return
   } else {
-    // Roll out to blue environment
-    stage "Deploy Blue"
+    // Roll out to green environment
+    stage "Deploy Green"
     
-    // Change deployed image in blue to the one we just built
-    sh("kubectl --namespace=${namespace} set image deployment/hello-world-blue hello-world=${imageTag}")
+    // Change deployed image in green to the one we just built
+    sh("kubectl --namespace=${namespace} set image deployment/hello-world-green hello-world=${imageTag}")
     
     // Apply version label to deployment
-    sh("kubectl --namespace=${namespace} label deployment hello-world-blue --overwrite version=v${BUILD_NUMBER}")
-    sh("kubectl --namespace=${namespace} label pod  -l env=blue --all --overwrite version=v${BUILD_NUMBER}")
+    sh("kubectl --namespace=${namespace} label deployment hello-world-green --overwrite version=v${BUILD_NUMBER}")
+    sh("kubectl --namespace=${namespace} label pod  -l env=green --all --overwrite version=v${BUILD_NUMBER}")
   }
-  stage 'Verify Blue'
+  stage 'Verify Green'
   def didTimeout = false
   def userInput = true
   try {
@@ -73,8 +73,7 @@ node {
       echo "userInput: [${userInput}]" 
     }
   } catch(err) { // timeout reached or input false
-    stage 'Rolling Back Blue'
-    echo "Rollout Aborted"
+    echo "Rollout to Green Aborted"
     echo "userInput: [${userInput}]"
     currentBuild.result = 'FAILURE'
 
@@ -82,10 +81,10 @@ node {
     if (prevImageTag != '') {
       echo "Rolling back to: ${prevImageTag}"
 
-      // Change deployed image in blue to the previous image
-    	sh("kubectl --namespace=${namespace} set image deployment/hello-world-blue hello-world=${prevImageTag}")	
-    	sh("kubectl --namespace=${namespace} label deployment hello-world-blue --overwrite version=${prevBuildNum}")
-      sh("kubectl --namespace=${namespace} label pod  -l env=blue --all --overwrite version=${prevBuildNum}")
+      // Change deployed image in green to the previous image
+    	sh("kubectl --namespace=${namespace} set image deployment/hello-world-green hello-world=${prevImageTag}")	
+    	sh("kubectl --namespace=${namespace} label deployment hello-world-green --overwrite version=${prevBuildNum}")
+      sh("kubectl --namespace=${namespace} label pod  -l env=green --all --overwrite version=${prevBuildNum}")
 
     }
     error('Aborted')
@@ -94,12 +93,10 @@ node {
   if (!firstDeploy) {
   stage 'Rollout to Production' 
     // Roll out to production environment
-    // Change deployed image in blue to the one we just built
-    //sh("sed -i.bak 's#quay.io/${project}/${appName}:.*\$#${imageTag}#' ./k8s/green/*.yaml")
-    //sh("kubectl --namespace=${namespace} apply -f k8s/green/")
-    sh("kubectl --namespace=${namespace} set image deployment/hello-world-green hello-world=${imageTag}")
-    sh("kubectl --namespace=${namespace} label deployment hello-world-green --overwrite version=v${BUILD_NUMBER}")
-    sh("kubectl --namespace=${namespace} label pod  -l env=green --all --overwrite version=v${BUILD_NUMBER}")
+    // Change ingress to point to green instead of blue
+    sh("sed -i.bak 's/hello-world-blue/hello-world-green/g' ./k8s/ingress/*.yaml")
+    //Apply ingress change to shift traffic to green
+    sh("kubectl --namespace=${namespace} apply -f k8s/ingress/")
     currentBuild.result = 'SUCCESS'
   }
 }

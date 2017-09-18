@@ -7,7 +7,7 @@ def namespace = 'default'
 def imageTag = "quay.io/${project}/${appName}:v${env.BUILD_NUMBER}"
 def prevImageTag = ''
 def prevBuildNum = ''
-def firstDeploy = falsbluegreen
+def firstDeploy = false
 
 node {
   // Check if there's a previous deployment, if so, get the image version so we can rollback if needed

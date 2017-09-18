@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-world-green
+  labels:
+    app: hello-world-green
+  annotations:
+    prometheus.io/path: "/"
+    prometheus.io/port: "8000"
+spec:
+  selector:
+    app: hello-world-green
+  ports:
+  - name: web
+    port: 5000
+  - name: metrics
+    port: 8000
+  type: LoadBalancer

@@ -50,6 +50,7 @@ node {
     sh("kubectl --namespace=${namespace} apply -f k8s/green/")
     sh("kubectl --namespace=${namespace} label deployment hello-world-green --overwrite version=v${BUILD_NUMBER}")
     sh("kubectl --namespace=${namespace} label pod  -l env=green --all --overwrite version=v${BUILD_NUMBER}")
+    sh("kubectl --namespace=${namespace} apply -f k8s/ingress/")
     currentBuild.result = 'SUCCESS'   
     return
   } else {

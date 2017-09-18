@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: hello-world-bluegreen 
+  name: hello-world-blue
   labels:
     app: hello-world-blue
   annotations:
